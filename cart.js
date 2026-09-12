@@ -1,4 +1,4 @@
-var WHATSAPP_NUMBER = '2347078368574';
+var WHATSAPP_NUMBER = '2349094304208';
 var CART_KEY = 'kravings_cart_v2';
 
 var MENU = {
