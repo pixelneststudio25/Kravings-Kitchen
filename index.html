@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kravings Kitchen: Real Food, Real Cravings</title>
+<meta name="description" content="Kravings Kitchen serves fresh Jollof rice, spaghetti, grilled proteins and jumbo shawarma made to order. Build your order and send it straight to us on WhatsApp.">
+<meta property="og:title" content="Kravings Kitchen: Real Food, Real Cravings">
+<meta property="og:description" content="Fresh Jollof, grilled proteins, jumbo shawarma and more. Order in minutes, straight to WhatsApp.">
+<meta property="og:image" content="images/kravings-meta.jpeg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="images/kravings-meta.jpeg">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header id="site-nav">
+  <div class="container nav-inner">
+    <a href="index.html" class="logo-mark">
+      <img src="images/kravings-logo.png" alt="Kravings Kitchen">
+    </a>
+    <nav class="primary-nav" aria-label="Primary navigation">
+      <ul>
+        <li><a href="menu.html">Menu</a></li>
+        <li><a href="#gallery">Gallery</a></li>
+        <li><a href="#reviews">Reviews</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+    <div class="nav-right">
+      <button class="cart-open-btn" aria-label="Open cart">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+        <span class="cart-count" hidden>0</span>
+      </button>
+      <button class="hamburger" id="hamburger-btn" aria-label="Toggle menu" aria-expanded="false" aria-controls="mobile-drawer">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<div class="drawer-overlay" id="drawer-overlay"></div>
+<nav class="mobile-drawer" id="mobile-drawer" aria-label="Mobile navigation">
+  <ul>
+    <li><a href="menu.html">Menu</a></li>
+    <li><a href="#gallery">Gallery</a></li>
+    <li><a href="#reviews">Reviews</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<main id="top">
+
+  <section class="hero" aria-label="Hero" style="background-image:url('images/hero.jpg');">
+    <div class="hero-overlay"></div>
+    <div class="container hero-inner">
+      <div class="hero-copy reveal">
+        <p class="eyebrow">Made fresh, made to order</p>
+        <h1>Whatever you're craving, we've got it hot.</h1>
+        <p>From smoky party Jollof to jumbo shawarma rolled tight, Kravings Kitchen cooks everything fresh and gets it to you fast. Build your order and send it straight to us on WhatsApp.</p>
+        <div class="hero-cta-group">
+          <a href="menu.html" class="btn">View Menu</a>
+          <a href="#contact" class="btn btn-outline">Chat on WhatsApp</a>
+        </div>
+        <div class="hero-badge">
+          <strong>Cooked to order</strong>
+          <span>Nothing sits under a lamp here</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="hours-strip reveal" aria-label="Opening Hours">
+    <div class="container hours-inner">
+      <p class="eyebrow hours-eyebrow">Opening hours</p>
+      <div class="hours-days">
+        <div class="hours-day">
+          <span class="hours-label">Mon to Fri</span>
+          <strong>10:00am to 9:00pm</strong>
+        </div>
+        <div class="hours-day">
+          <span class="hours-label">Saturday</span>
+          <strong>11:00am to 10:00pm</strong>
+        </div>
+        <div class="hours-day">
+          <span class="hours-label">Sunday</span>
+          <strong>1:00pm to 8:00pm</strong>
+        </div>
+      </div>
+      <a href="#contact" class="btn">Get directions</a>
+    </div>
+  </section>
+
+  <section aria-label="Menu preview">
+    <div class="container">
+      <div class="menu-preview-header reveal">
+        <p class="eyebrow">The menu</p>
+        <h2>Four categories, everything made when you order it</h2>
+        <p>Mains, protein, shawarma and drinks. Mix any of it into one order on the full menu page.</p>
+      </div>
+      <div class="menu-preview-grid">
+        <div class="menu-preview-card reveal">
+          <div class="card-photo"><img src="images/jollof-rice.jpg" alt="Jollof rice" loading="lazy"></div>
+          <div class="card-body">
+            <h3>Jollof rice</h3>
+            <p>Smoky, party style, cooked in one pot.</p>
+            <span class="price">₦1,500</span>
+          </div>
+        </div>
+        <div class="menu-preview-card reveal">
+          <div class="card-photo"><img src="images/chicken.jpg" alt="Grilled chicken" loading="lazy"></div>
+          <div class="card-body">
+            <h3>Grilled chicken</h3>
+            <p>Dry pepper rub, grilled to order.</p>
+            <span class="price">₦3,000</span>
+          </div>
+        </div>
+        <div class="menu-preview-card reveal">
+          <div class="card-photo"><img src="images/shawarma.jpg" alt="Jumbo shawarma" loading="lazy"></div>
+          <div class="card-body">
+            <h3>Jumbo shawarma</h3>
+            <p>Rolled tight, sauce on the side if you ask.</p>
+            <span class="price">₦6,000</span>
+          </div>
+        </div>
+        <div class="menu-preview-card reveal">
+          <div class="card-photo"><img src="images/goat-meat.jpg" alt="Goat meat" loading="lazy"></div>
+          <div class="card-body">
+            <h3>Goat meat</h3>
+            <p>Slow cooked until it pulls apart easily.</p>
+            <span class="price">From ₦1,000</span>
+          </div>
+        </div>
+      </div>
+      <div style="margin-top:40px;" class="reveal">
+        <a href="menu.html" class="btn btn-outline">See the full menu</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="gallery-section" id="gallery" aria-label="Gallery">
+    <div class="container">
+      <div class="gallery-header reveal">
+        <p class="eyebrow">A closer look</p>
+        <h2>What's cooking today</h2>
+      </div>
+      <div class="gallery-grid">
+        <figure class="reveal"><img src="images/jollof-rice.jpg" alt="Jollof rice with chicken" loading="lazy"><figcaption>Jollof rice</figcaption></figure>
+        <figure class="reveal"><img src="images/chicken.jpg" alt="Shawarma" loading="lazy"><figcaption>Shawarma</figcaption></figure>
+        <figure class="reveal"><img src="images/fried-potatoes.jpg" alt="Grilled chicken" loading="lazy"><figcaption>Grilled chicken</figcaption></figure>
+        <figure class="reveal"><img src="images/jollof-spaghetti.jpg" alt="Kunu and zobo drinks" loading="lazy"><figcaption>Kunu and zobo</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section id="reviews" aria-label="Testimonials">
+    <div class="container">
+      <div class="testimonials-header reveal">
+        <p class="eyebrow">Guest words</p>
+        <h2>What people are saying</h2>
+      </div>
+      <div class="testimonial-grid">
+        <blockquote class="testimonial-card reveal">
+          <p class="testimonial-quote">"Ordered the jollof and grilled chicken combo, got here still hot, plantain perfectly caramelised. My go to now."</p>         
+        </blockquote>
+        <blockquote class="testimonial-card reveal">
+          <p class="testimonial-quote">"The jumbo shawarma is no joke, properly loaded and the sauce is balanced, not drowning everything."</p>
+        </blockquote>
+        <blockquote class="testimonial-card reveal">
+          <p class="testimonial-quote">"Ordering on WhatsApp was so easy, I just added what I wanted and sent it. Zero stress, quick reply too."</p>
+        </blockquote>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact-section" id="contact" aria-label="Contact">
+    <div class="container">
+      <div class="contact-info reveal">
+        <p class="eyebrow">Visit or order in</p>
+        <h2>Get in touch</h2>
+        <p>Add your items on the menu page and send the order on WhatsApp. We'll confirm delivery or pickup and payment with you directly in the chat.</p>
+        <div class="contact-detail"><strong>Address</strong>Add your restaurant address here</div>
+        <div class="contact-detail"><strong>WhatsApp or phone</strong>0707 836 8574</div>
+        <div class="contact-detail"><strong>Instagram</strong>@kravingskitchen5</div>
+      </div>
+      <div class="contact-visual reveal">
+        <img src="images/footer.jpg" alt="Kravings Kitchen" loading="lazy">
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container footer-inner">
+    <a href="index.html" class="logo-mark">
+      <img src="images/kravings-logo.png" alt="Kravings Kitchen">
+    </a>
+    <p class="tagline">Real food, real cravings, cooked fresh and ready when you are.</p>
+    <div class="footer-socials">
+      <a href="https://instagram.com/kravingskitchen5" target="_blank" rel="noopener" aria-label="Instagram">
+        <svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.9.1 1.2.1 1.9.2 2.3.4.6.2 1 .5 1.4.9.4.4.7.8.9 1.4.2.4.3 1 .4 2.3.1 1.3.1 1.7.1 4.9s0 3.6-.1 4.9c-.1 1.2-.2 1.9-.4 2.3-.2.6-.5 1-.9 1.4-.4.4-.8.7-1.4.9-.4.2-1 .3-2.3.4-1.3.1-1.7.1-4.9.1s-3.6 0-4.9-.1c-1.2-.1-1.9-.2-2.3-.4-.6-.2-1-.5-1.4-.9-.4-.4-.7-.8-.9-1.4-.2-.4-.3-1-.4-2.3-.1-1.3-.1-1.7-.1-4.9s0-3.6.1-4.9c.1-1.2.2-1.9.4-2.3.2-.6.5-1 .9-1.4.4-.4.8-.7 1.4-.9.4-.2 1-.3 2.3-.4 1.3-.1 1.7-.1 4.9-.1M12 0C8.7 0 8.3 0 7 .1 5.7.1 4.8.3 4 .6c-.8.3-1.6.7-2.2 1.4C1.1 2.6.7 3.3.4 4.2.1 5 0 5.9 0 7.1 0 8.3 0 8.7 0 12s0 3.7.1 5c.1 1.2.2 2.1.5 2.9.3.8.7 1.6 1.4 2.2.6.6 1.3 1.1 2.2 1.4.8.3 1.7.5 3 .5 1.2.1 1.6.1 4.9.1s3.7 0 5-.1c1.2-.1 2.1-.2 3-.5.8-.3 1.6-.7 2.2-1.4.6-.6 1.1-1.3 1.4-2.2.3-.8.5-1.7.5-3 .1-1.2.1-1.6.1-4.9s0-3.7-.1-5c-.1-1.2-.2-2.1-.5-3-.3-.8-.7-1.6-1.4-2.2C21.4 1.1 20.7.7 19.9.4c-.8-.3-1.7-.5-3-.5C15.7 0 15.3 0 12 0z"/><path d="M12 5.8A6.2 6.2 0 1 0 18.2 12 6.2 6.2 0 0 0 12 5.8zm0 10.2A4 4 0 1 1 16 12a4 4 0 0 1-4 4z"/><circle cx="18.4" cy="5.6" r="1.4"/></svg>
+      </a>
+      <a href="https://wa.me/2347078368574" target="_blank" rel="noopener" aria-label="WhatsApp">
+        <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.001 2C6.478 2 2 6.477 2 12c0 1.876.52 3.63 1.42 5.13L2 22l4.99-1.31A9.95 9.95 0 0 0 12.001 22C17.524 22 22 17.523 22 12S17.524 2 12.001 2zm0 18.05a8.03 8.03 0 0 1-4.1-1.13l-.294-.175-3.02.792.81-2.943-.192-.303A8.05 8.05 0 1 1 20.05 12a8.05 8.05 0 0 1-8.049 8.05z"/></svg>
+      </a>
+    </div>
+  </div>
+</footer>
+
+<div class="cart-overlay" id="cart-overlay"></div>
+<aside class="cart-drawer" id="cart-drawer" aria-label="Your order">
+  <div class="cart-head">
+    <h3>Your order</h3>
+    <button class="cart-close" id="cart-close-btn" aria-label="Close cart">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </button>
+  </div>
+  <div class="cart-items" id="cart-items"></div>
+  <div class="cart-foot">
+    <div class="cart-total-row"><span>Total</span><strong id="cart-total">₦0</strong></div>
+    <button class="btn" id="checkout-btn" disabled>Order on WhatsApp</button>
+    <p class="cart-note">We'll send your order to Kravings Kitchen on WhatsApp. Address, delivery and payment are sorted with them directly in the chat.</p>
+  </div>
+</aside>
+
+<div class="mobile-cart-bar" id="mobile-cart-bar">
+  <span id="mobile-cart-summary">0 items</span>
+  <span id="mobile-cart-total">₦0</span>
+</div>
+
+<div id="whatsapp-float">
+  <a href="https://wa.me/2347078368574" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.001 2C6.478 2 2 6.477 2 12c0 1.876.52 3.63 1.42 5.13L2 22l4.99-1.31A9.95 9.95 0 0 0 12.001 22C17.524 22 22 17.523 22 12S17.524 2 12.001 2zm0 18.05a8.03 8.03 0 0 1-4.1-1.13l-.294-.175-3.02.792.81-2.943-.192-.303A8.05 8.05 0 1 1 20.05 12a8.05 8.05 0 0 1-8.049 8.05z"/></svg>
+  </a>
+</div>
+
+<script src="cart.js"></script>
+
+</body>
+</html>
