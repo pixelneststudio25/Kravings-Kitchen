@@ -192,11 +192,34 @@ footer p.tagline{color:var(--paper-dim);font-size:.9rem;max-width:380px;}
 .qty-control span{font-size:.88rem;font-weight:700;min-width:14px;text-align:center;}
 .remove-line{background:none;border:none;color:var(--paper-dim);font-size:.75rem;cursor:pointer;text-decoration:underline;margin-top:8px;}
 .cart-foot{padding:24px 26px 28px;border-top:1px solid var(--ash-line);}
+.cart-fee-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:.86rem;color:var(--paper-dim);}
+.cart-fee-row span:last-child{color:var(--paper);font-weight:600;}
 .cart-total-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;}
 .cart-total-row span:first-child{color:var(--paper-dim);font-size:.9rem;}
 .cart-total-row strong{font-family:'Playfair Display',serif;font-size:1.4rem;color:var(--orange);}
 .cart-foot .btn{width:100%;}
+.clear-cart-btn{
+  display:block;width:100%;background:none;border:none;color:var(--paper-dim);
+  font-size:.8rem;font-weight:600;text-decoration:underline;text-underline-offset:3px;
+  cursor:pointer;padding:12px 0 2px;text-align:center;transition:color .2s ease;
+}
+.clear-cart-btn:hover{color:#ff8a83;}
 .cart-note{color:var(--paper-dim);font-size:.75rem;margin-top:14px;line-height:1.6;}
+
+/* ---------- shared site confirm modal (e.g. "Clear your order?") ---------- */
+.site-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1400;display:none;align-items:flex-end;justify-content:center;}
+.site-modal-overlay.open{display:flex;}
+.site-modal-card{background:var(--ash-900);border:1px solid var(--ash-line);border-radius:18px 18px 0 0;padding:26px 22px calc(22px + env(safe-area-inset-bottom));width:100%;max-width:420px;}
+.site-modal-card h3{font-size:1.1rem;margin-bottom:8px;}
+.site-modal-card p{color:var(--paper-dim);font-size:.86rem;margin-bottom:20px;}
+.site-modal-actions{display:flex;gap:10px;}
+.site-modal-actions .btn, .site-modal-actions .small-btn{flex:1;min-height:48px;}
+.site-modal-actions .small-btn{background:var(--ash-800);border:1px solid var(--ash-line);color:var(--paper);border-radius:0;font-weight:700;font-size:.86rem;cursor:pointer;}
+.site-modal-actions .small-btn:hover{background:var(--ash-700);}
+@media (min-width:560px){
+  .site-modal-overlay{align-items:center;}
+  .site-modal-card{border-radius:16px;}
+}
 
 .mobile-cart-bar{position:fixed;left:16px;right:16px;bottom:16px;z-index:900;background:var(--red);color:var(--on-accent);padding:16px 22px;border-radius:12px;display:none;align-items:center;justify-content:space-between;box-shadow:0 10px 30px rgba(0,0,0,.4);cursor:pointer;transition:transform .2s ease;}
 .mobile-cart-bar.show{display:flex;}
