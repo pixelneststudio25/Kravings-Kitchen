@@ -1,5 +1,6 @@
 var WHATSAPP_NUMBER = '2349094304208';
 var CART_KEY = 'kravings_cart_v3';
+var DELIVERY_FEE = 500;
 
 // ====== FILL THESE IN FROM YOUR SUPABASE PROJECT SETTINGS ======
 var SUPABASE_URL = 'https://eufuhzjsnhrabxkspxjh.supabase.co';
@@ -123,18 +124,47 @@ function saveCart(cart){
 
 function buildWhatsAppMessage(cart){
   var lines = ['Hi Kravings Kitchen, I would like to place an order:', ''];
-  var total = 0;
+  var itemsTotal = 0;
   Object.keys(cart).forEach(function(id){
     var line = cart[id];
     var lineTotal = line.price * line.qty;
-    total += lineTotal;
+    itemsTotal += lineTotal;
     lines.push('- ' + line.qty + 'x ' + line.name + ' (' + formatNaira(lineTotal) + ')');
   });
   lines.push('');
-  lines.push('Total: ' + formatNaira(total));
+  lines.push('Subtotal: ' + formatNaira(itemsTotal));
+  lines.push('Delivery fee: ' + formatNaira(DELIVERY_FEE));
+  lines.push('Total: ' + formatNaira(itemsTotal + DELIVERY_FEE));
   lines.push('');
   lines.push('Please confirm delivery or pickup, and how to pay. Thank you.');
   return lines.join('\n');
+}
+
+/* ---------- lightweight confirm modal shared by the customer site ---------- */
+function initSiteConfirmModal(){
+  var overlay = document.getElementById('confirm-overlay');
+  if(!overlay) { window.kravingsConfirm = function(){ return Promise.resolve(window.confirm('Are you sure?')); }; return; }
+  var titleEl = document.getElementById('confirm-title');
+  var descEl = document.getElementById('confirm-desc');
+  var cancelBtn = document.getElementById('confirm-cancel');
+  var confirmBtn = document.getElementById('confirm-ok');
+  var resolveFn = null;
+
+  function close(result){
+    overlay.classList.remove('open');
+    if(resolveFn){ resolveFn(result); resolveFn = null; }
+  }
+  cancelBtn.addEventListener('click', function(){ close(false); });
+  overlay.addEventListener('click', function(e){ if(e.target === overlay) close(false); });
+  confirmBtn.addEventListener('click', function(){ close(true); });
+
+  window.kravingsConfirm = function(title, desc){
+    titleEl.textContent = title || '';
+    descEl.textContent = desc || '';
+    descEl.style.display = desc ? '' : 'none';
+    overlay.classList.add('open');
+    return new Promise(function(resolve){ resolveFn = resolve; });
+  };
 }
 
 function initCartUI(){
@@ -142,15 +172,20 @@ function initCartUI(){
 
   var cartItemsEl = document.getElementById('cart-items');
   var cartTotalEl = document.getElementById('cart-total');
+  var cartFeeRow = document.getElementById('cart-fee-row');
+  var cartFeeEl = document.getElementById('cart-fee');
   var cartCountEls = document.querySelectorAll('.cart-count');
   var checkoutBtn = document.getElementById('checkout-btn');
+  var clearBtn = document.getElementById('clear-cart-btn');
   var mobileBar = document.getElementById('mobile-cart-bar');
   var mobileSummary = document.getElementById('mobile-cart-summary');
   var mobileTotal = document.getElementById('mobile-cart-total');
 
+  if(cartFeeEl) cartFeeEl.textContent = formatNaira(DELIVERY_FEE);
+
   function renderCart(){
     var ids = Object.keys(cart);
-    var total = 0, count = 0;
+    var itemsTotal = 0, count = 0;
     if(cartItemsEl){
       cartItemsEl.innerHTML = '';
       if(ids.length === 0){
@@ -161,7 +196,7 @@ function initCartUI(){
       }
       ids.forEach(function(id){
         var line = cart[id];
-        total += line.price * line.qty;
+        itemsTotal += line.price * line.qty;
         count += line.qty;
         var row = document.createElement('div');
         row.className = 'cart-line';
@@ -183,11 +218,14 @@ function initCartUI(){
         cartItemsEl.appendChild(row);
       });
     } else {
-      ids.forEach(function(id){ total += cart[id].price * cart[id].qty; count += cart[id].qty; });
+      ids.forEach(function(id){ itemsTotal += cart[id].price * cart[id].qty; count += cart[id].qty; });
     }
 
-    if(cartTotalEl) cartTotalEl.textContent = formatNaira(total);
-    if(mobileTotal) mobileTotal.textContent = formatNaira(total);
+    var grandTotal = count > 0 ? itemsTotal + DELIVERY_FEE : 0;
+
+    if(cartFeeRow) cartFeeRow.hidden = count === 0;
+    if(cartTotalEl) cartTotalEl.textContent = formatNaira(grandTotal);
+    if(mobileTotal) mobileTotal.textContent = formatNaira(grandTotal);
     if(mobileSummary) mobileSummary.textContent = count + (count === 1 ? ' item' : ' items');
     cartCountEls.forEach(function(el){
       if(count > 0){ el.hidden = false; el.textContent = count; }
@@ -196,6 +234,7 @@ function initCartUI(){
     if(mobileBar) mobileBar.classList.toggle('show', count > 0);
     document.body.classList.toggle('has-items', count > 0);
     if(checkoutBtn) checkoutBtn.disabled = count === 0;
+    if(clearBtn) clearBtn.hidden = count === 0;
   }
 
   function addToCart(id, name, price){
@@ -215,6 +254,14 @@ function initCartUI(){
   }
   function removeLine(id){
     delete cart[id];
+    saveCart(cart);
+    renderCart();
+  }
+  async function clearCart(){
+    if(Object.keys(cart).length === 0) return;
+    var ok = await window.kravingsConfirm('Clear your order?', 'This removes everything currently in your cart.');
+    if(!ok) return;
+    cart = {};
     saveCart(cart);
     renderCart();
   }
@@ -256,6 +303,7 @@ function initCartUI(){
   if(closeBtn) closeBtn.addEventListener('click', closeCart);
   if(cartOverlay) cartOverlay.addEventListener('click', closeCart);
   if(mobileBar) mobileBar.addEventListener('click', openCart);
+  if(clearBtn) clearBtn.addEventListener('click', clearCart);
 
   if(checkoutBtn){
     checkoutBtn.addEventListener('click', function(){
@@ -321,11 +369,49 @@ function initMobileDrawer(){
   drawer.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', closeDrawer); });
 }
 
+/* ---------- back-and-forth "this scrolls" nudge for the category chips ---------- */
+function initChipAutoScroll(){
+  var wrap = document.getElementById('menu-tabs');
+  if(!wrap) return;
+  var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(prefersReduced) return;
+
+  var direction = 1;
+  var paused = false;
+  var resumeTimer = null;
+
+  function maxScroll(){ return wrap.scrollWidth - wrap.clientWidth; }
+
+  function tick(){
+    if(paused) return;
+    var max = maxScroll();
+    if(max <= 4) return; // nothing to hint at
+    var target = direction === 1 ? max : 0;
+    wrap.scrollTo({ left: target, behavior: 'smooth' });
+    direction *= -1;
+  }
+
+  function pause(){
+    paused = true;
+    clearTimeout(resumeTimer);
+    resumeTimer = setTimeout(function(){ paused = false; }, 4000);
+  }
+
+  ['touchstart', 'mousedown', 'wheel'].forEach(function(evt){
+    wrap.addEventListener(evt, pause, { passive: true });
+  });
+
+  // give layout a moment to settle before measuring scrollWidth
+  setTimeout(function(){ setInterval(tick, 3000); }, 800);
+}
+
 document.addEventListener('DOMContentLoaded', function(){
+  initSiteConfirmModal();
   window.kravingsMenuReady.then(function(){
     initCartUI();
     initScrollReveal();
     initNavScroll();
     initMobileDrawer();
+    initChipAutoScroll();
   });
 });
