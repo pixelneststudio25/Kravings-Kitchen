@@ -2,8 +2,8 @@ var WHATSAPP_NUMBER = '2349094304208';
 var CART_KEY = 'kravings_cart_v3';
 
 // ====== FILL THESE IN FROM YOUR SUPABASE PROJECT SETTINGS ======
-var SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
-var SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_PUBLIC_KEY';
+var SUPABASE_URL = 'https://eufuhzjsnhrabxkspxjh.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1ZnVoempzbmhyYWJ4a3NweGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMTI0MDcsImV4cCI6MjEwNDc4ODQwN30.5r69GeVwjBMCzfOZOonpF8BJGkDFPaxKBmokCghSmNY';
 // =================================================================
 
 var supabaseClient = null;
