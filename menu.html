@@ -97,9 +97,13 @@
   </div>
   <div class="cart-items" id="cart-items"></div>
   <div class="cart-foot">
+    <div class="cart-fee-row" id="cart-fee-row" hidden>
+      <span>Delivery fee</span><span id="cart-fee">₦500</span>
+    </div>
     <div class="cart-total-row"><span>Total</span><strong id="cart-total">₦0</strong></div>
     <button class="btn" id="checkout-btn" disabled>Order on WhatsApp</button>
-    <p class="cart-note">We'll send your order to Kravings Kitchen on WhatsApp. Address, delivery and payment are sorted with them directly in the chat.</p>
+    <button class="clear-cart-btn" id="clear-cart-btn" hidden type="button">Clear order</button>
+    <p class="cart-note">A ₦500 delivery fee is added automatically and covered by the customer. Confirm delivery or pickup with us on WhatsApp.</p>
   </div>
 </aside>
 
@@ -112,6 +116,18 @@
   <a href="https://wa.me/2349094304208" target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12.001 2C6.478 2 2 6.477 2 12c0 1.876.52 3.63 1.42 5.13L2 22l4.99-1.31A9.95 9.95 0 0 0 12.001 22C17.524 22 22 17.523 22 12S17.524 2 12.001 2zm0 18.05a8.03 8.03 0 0 1-4.1-1.13l-.294-.175-3.02.792.81-2.943-.192-.303A8.05 8.05 0 1 1 20.05 12a8.05 8.05 0 0 1-8.049 8.05z"/></svg>
   </a>
+</div>
+
+<!-- Shared confirm modal, used for "Clear your order?" -->
+<div class="site-modal-overlay" id="confirm-overlay">
+  <div class="site-modal-card">
+    <h3 id="confirm-title"></h3>
+    <p id="confirm-desc"></p>
+    <div class="site-modal-actions">
+      <button class="small-btn" id="confirm-cancel" type="button">Cancel</button>
+      <button class="btn" id="confirm-ok" type="button">Clear order</button>
+    </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
