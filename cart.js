@@ -1,35 +1,78 @@
 var WHATSAPP_NUMBER = '2349094304208';
-var CART_KEY = 'kravings_cart_v2';
+var CART_KEY = 'kravings_cart_v3';
+
+// ====== FILL THESE IN FROM YOUR SUPABASE PROJECT SETTINGS ======
+var SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
+var SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_PUBLIC_KEY';
+// =================================================================
+
+var supabaseClient = null;
+if(window.supabase && SUPABASE_URL.indexOf('YOUR_') !== 0){
+  try{ supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); }catch(e){}
+}
 
 var MENU = {
-  main: {
-    label: 'Main dish',
+  rice: {
+    label: 'Rice',
     items: [
-      { id: 'jollof-rice', name: 'Jollof rice', price: 1500, note: 'Smoky, party style, cooked in one pot.', photo: 'images/jollof-rice.jpg' },
-      { id: 'jollof-spaghetti', name: 'Jollof spaghetti', price: 2000, note: 'The same base sauce, twisted through spaghetti.', photo: 'images/jollof-spaghetti.jpg' },
-      { id: 'yam-fries', name: 'Yam, cut and fried', price: 2000, note: 'Golden on the outside, soft through the middle.', photo: 'images/fried-yam.jpg' },
-      { id: 'irish-sweet-potato', name: 'Irish and sweet potato', price: 2000, note: 'Two potatoes, one plate, lightly seasoned.', photo: 'images/fried-potatoes.jpg' },
-      { id: 'plantain', name: 'Plantain', price: 500, note: 'Ripe, fried until the edges caramelise.', photo: 'images/fried-plantains.jpg' },
-      { id: 'noodles', name: 'Noodles', price: 1500, note: 'Quick, peppery, always a safe order.', photo: 'images/noodles.jpg' }
+      { id: 'jollof-rice', name: 'Jollof rice', price: 2000, note: 'Smoky, party style, cooked in one pot.', photo: 'images/jollof rice.jpg' },
+      { id: 'rice-and-stew', name: 'Rice and stew', price: 2000, note: 'White rice, side of pepper stew.', photo: 'images/jollof rice.jpg' },
+      { id: 'fried-rice', name: 'Fried rice', price: 2500, note: 'Mixed vegetables, lightly seasoned.', photo: 'images/jollof rice.jpg' },
+      { id: 'chinese-rice', name: 'Chinese rice', price: 3000, note: 'Stir fried with a mix of proteins and veg.', photo: 'images/jollof rice.jpg' }
+    ]
+  },
+  yamPlantainPotato: {
+    label: 'Yam, plantain and potatoes',
+    items: [
+      { id: 'yam-fries', name: 'Yam, cut and fried', price: 2000, note: 'Golden on the outside, soft through the middle.', photo: 'images/fried yam.jpg' },
+      { id: 'boiled-yam', name: 'Boiled yam', price: 2000, note: 'Soft boiled, no oil.', photo: 'images/fried yam.jpg' },
+      { id: 'fried-plantain', name: 'Plantain, fried', price: 1000, note: 'Ripe, fried until the edges caramelise.', photo: 'images/fried plantains.jpg' },
+      { id: 'boiled-plantain', name: 'Boiled plantain', price: 2000, note: 'Soft boiled, no oil.', photo: 'images/fried plantains.jpg' },
+      { id: 'sweet-potato-fries', name: 'Sweet potato, fries', price: 2000, note: 'Cut thin, fried crisp.', photo: 'images/fried potatoes.jpg' },
+      { id: 'irish-potato-fries', name: 'Irish potato, fries', price: 2500, note: 'Cut thin, fried crisp.', photo: 'images/fried potatoes.jpg' }
+    ]
+  },
+  noodlesPasta: {
+    label: 'Noodles and pasta',
+    items: [
+      { id: 'jollof-spaghetti', name: 'Jollof spaghetti', price: 2500, note: 'The same base sauce, twisted through spaghetti.', photo: 'images/jollof spaghetti.jpg' },
+      { id: 'chicken-noodles', name: 'Chicken noodles', price: 3000, note: 'Stir fried noodles topped with chicken.', photo: 'images/noodles.jpg' },
+      { id: 'beef-noodles', name: 'Beef noodles', price: 3000, note: 'Stir fried noodles topped with beef.', photo: 'images/noodles.jpg' },
+      { id: 'seafood-noodles', name: 'Sea food noodles', price: 4500, note: 'Stir fried noodles with a mix of seafood.', photo: 'images/noodles.jpg' },
+      { id: 'shrimp-pasta', name: 'Shrimp pasta', price: 4500, note: 'Pasta tossed with shrimp in a light sauce.', photo: 'images/noodles.jpg' },
+      { id: 'stir-fry-pasta', name: 'Stir fry pasta', price: 3500, note: 'Pasta stir fried with mixed vegetables.', photo: 'images/noodles.jpg' },
+      { id: 'classic-noodles', name: 'Classic noodles', price: 1500, note: 'Quick, peppery, always a safe order.', photo: 'images/noodles.jpg' },
+      { id: 'noodles-full-package', name: 'Noodles full package', price: 2700, note: 'Classic noodles with eggs, served with a takeaway plate included.', photo: 'images/noodles.jpg' }
     ]
   },
   protein: {
     label: 'Protein',
     items: [
-      { id: 'eggs', name: 'Eggs', price: 1000, note: 'Fried or scrambled, your call in the chat.', photo: 'images/fried-eggs.jpg' },
+      { id: 'eggs', name: 'Eggs', price: 1000, note: 'Fried or scrambled, your call in the chat.', photo: 'images/fried eggs.jpg' },
       { id: 'chicken', name: 'Chicken', price: 3000, note: 'Grilled with a dry pepper rub.', photo: 'images/chicken.jpg' },
-      { id: 'goat-meat', name: 'Goat meat', note: 'Slow cooked until it pulls apart easily.', photo: 'images/goat-meat.jpg', variants: [
-        { label: 'Small', price: 1000 }, { label: 'Medium', price: 1500 }, { label: 'Large', price: 3000 }
+      { id: 'goat-meat', name: 'Goat meat', note: 'Slow cooked until it pulls apart easily.', photo: 'images/goat meat.jpg', variants: [
+        { label: 'Small', price: 1500 }, { label: 'Large', price: 3000 }
       ]},
-      { id: 'beef', name: 'Beef', price: 500, note: 'Cut thin, peppered, grilled hot.', photo: 'images/beef.jpg' },
-      { id: 'fish', name: 'Fish', price: 1000, note: 'Whole, grilled, bones in.', photo: 'images/fish.jpg' }
+      { id: 'beef', name: 'Beef', note: 'Cut thin, peppered, grilled hot.', photo: 'images/beef.jpg', variants: [
+        { label: 'Small', price: 500 }, { label: 'Large', price: 1000 }
+      ]},
+      { id: 'fish', name: 'Fish', note: 'Whole, grilled, bones in.', photo: 'images/fish.jpg', variants: [
+        { label: 'Small', price: 3000 }, { label: 'Medium', price: 3500 }, { label: 'Large', price: 4000 }
+      ]}
+    ]
+  },
+  sauce: {
+    label: 'Sauce',
+    items: [
+      { id: 'egg-sauce', name: 'Egg sauce', price: 1500, note: 'Peppered stew cooked through with egg.', photo: 'images/fried eggs.jpg' },
+      { id: 'fish-sauce', name: 'Fish sauce', price: 2000, note: 'Peppered stew cooked through with fish.', photo: 'images/fish.jpg' }
     ]
   },
   shawarma: {
     label: 'Shawarma',
     items: [
       { id: 'shawarma', name: 'Shawarma', note: 'Rolled tight, sauce on the side if you ask.', photo: 'images/shawarma.jpg', variants: [
-        { label: 'Small', price: 3500 }, { label: 'Medium', price: 4500 }, { label: 'Jumbo', price: 6000 }
+        { label: 'Small', price: 3800 }, { label: 'Medium', price: 4500 }, { label: 'Jumbo', price: 7000 }
       ]}
     ]
   },
@@ -37,12 +80,36 @@ var MENU = {
     label: 'Drinks',
     items: [
       { id: 'kunu', name: 'Kunu', price: 500, note: 'Cold, mild, made in house.', photo: 'images/kunu.jpg' },
-      { id: 'zobo', name: 'Zobo', price: 500, note: 'Dark, tart, lightly spiced.', photo: 'images/zobo.jpg' }
+      { id: 'zobo', name: 'Zobo', price: 500, note: 'Dark, tart, lightly spiced.', photo: 'images/zobo.jpg' },
+      { id: 'tigernut', name: 'Tigernut', price: 1000, note: 'Cold, naturally sweet, made in house.', photo: 'images/kunu.jpg' }
+    ]
+  },
+  extras: {
+    label: 'Extras',
+    items: [
+      { id: 'takeaway-plate', name: 'Takeaway plate', note: 'Add this if you need your order packed to go.', photo: 'images/fried yam.jpg', variants: [
+        { label: 'Small', price: 300 }, { label: 'Large', price: 500 }
+      ]}
     ]
   }
 };
 
 function formatNaira(n){ return '\u20A6' + n.toLocaleString('en-NG'); }
+
+// Tries to load the owner's live published menu from Supabase. If Supabase
+// isn't configured yet, or the request fails, or nothing has been published
+// yet, the hardcoded MENU above stays in place, so the site never breaks.
+window.kravingsMenuReady = (async function(){
+  if(!supabaseClient) return;
+  try{
+    var result = await supabaseClient.from('published_snapshot').select('data').eq('id', 1).single();
+    var liveData = result && result.data && result.data.data;
+    if(liveData && Object.keys(liveData).length){
+      Object.keys(MENU).forEach(function(k){ delete MENU[k]; });
+      Object.keys(liveData).forEach(function(k){ MENU[k] = liveData[k]; });
+    }
+  }catch(e){ /* keep the hardcoded MENU as a safe fallback */ }
+})();
 
 function loadCart(){
   try{
@@ -255,8 +322,10 @@ function initMobileDrawer(){
 }
 
 document.addEventListener('DOMContentLoaded', function(){
-  initCartUI();
-  initScrollReveal();
-  initNavScroll();
-  initMobileDrawer();
+  window.kravingsMenuReady.then(function(){
+    initCartUI();
+    initScrollReveal();
+    initNavScroll();
+    initMobileDrawer();
+  });
 });

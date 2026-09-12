@@ -44,7 +44,7 @@ header#site-nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:26px 0;
 header#site-nav.scrolled{background:rgba(13,13,12,.95);backdrop-filter:blur(10px);padding:16px 0;border-bottom:1px solid var(--ash-line);}
 .nav-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;}
 .logo-mark{display:flex;align-items:center;gap:10px;}
-.logo-mark img{height:45px;width:auto;flex-shrink:0;}
+.logo-mark img{height:36px;width:auto;flex-shrink:0;}
 nav.primary-nav ul{display:flex;gap:38px;list-style:none;}
 nav.primary-nav a{font-size:.86rem;font-weight:600;position:relative;padding-bottom:4px;}
 nav.primary-nav a.current{color:var(--orange);}
@@ -203,11 +203,7 @@ footer p.tagline{color:var(--paper-dim);font-size:.9rem;max-width:380px;}
 .mobile-cart-bar:active{transform:scale(.98);}
 .mobile-cart-bar span{font-weight:800;font-size:.9rem;}
 
-#whatsapp-float{position:fixed;bottom:3rem;right:2.25rem;z-index:800;transition:bottom .3s ease;}
-body.has-items #whatsapp-float{bottom:7rem;}
-@media (min-width:1025px){
-  body.has-items #whatsapp-float{bottom:1.25rem;}
-}
+#whatsapp-float{position:fixed;bottom:1.25rem;right:1.25rem;z-index:800;}
 #whatsapp-float a{display:flex;align-items:center;justify-content:center;width:3.1rem;height:3.1rem;border-radius:50%;background:#25D366;color:#fff;box-shadow:0 4px 14px rgba(37,211,102,.4);transition:transform .25s ease;}
 #whatsapp-float a:hover{transform:scale(1.08);}
 #whatsapp-float svg{width:1.6rem;height:1.6rem;fill:#fff;}
@@ -232,6 +228,10 @@ body.has-items #whatsapp-float{bottom:7rem;}
 .menu-tab.active{color:var(--ash-950);background:var(--orange);border-color:var(--orange);}
 .menu-tab:hover{color:var(--paper);}
 .menu-tab.active:hover{color:var(--ash-950);}
+@media (max-width:480px){
+  .menu-tabs-inner{gap:6px;padding:8px 0;}
+  .menu-tab{padding:7px 12px;font-size:.72rem;}
+}
 .menu-category{padding:60px 0;border-bottom:1px solid var(--ash-line);}
 .menu-category-title{font-size:1.8rem;margin-bottom:6px;}
 .menu-category-count{color:var(--paper-dim);font-size:.85rem;margin-bottom:36px;}

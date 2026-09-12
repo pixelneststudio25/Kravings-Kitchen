@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kravings Kitchen: Admin</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  body{padding-bottom:80px;}
+  .admin-wrap{max-width:900px;margin:0 auto;padding:40px 24px 100px;}
+  .admin-header{padding-top:40px;margin-bottom:32px;}
+  .admin-header h1{font-size:1.8rem;margin-bottom:8px;}
+  .admin-header p{color:var(--paper-dim);font-size:.9rem;}
+
+  .login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;}
+  .login-card{background:var(--ash-900);border:1px solid var(--ash-line);border-radius:16px;padding:40px 32px;max-width:360px;width:100%;text-align:center;}
+  .login-card img{height:44px;margin:0 auto 24px;}
+  .login-card h2{font-size:1.3rem;margin-bottom:8px;}
+  .login-card p{color:var(--paper-dim);font-size:.85rem;margin-bottom:24px;}
+  .login-card input{width:100%;padding:14px 16px;background:var(--ash-800);border:1px solid var(--ash-line);border-radius:10px;color:var(--paper);font-size:1rem;margin-bottom:16px;font-family:inherit;}
+  .login-card .btn{width:100%;}
+  .login-error{color:var(--red);font-size:.82rem;margin-top:12px;min-height:1em;}
+
+  .panel{background:var(--ash-900);border:1px solid var(--ash-line);border-radius:14px;padding:24px;margin-bottom:24px;}
+  .panel-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;}
+  .panel-head h2{font-size:1.2rem;}
+  .cat-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--ash-line);}
+  .cat-row:last-child{border-bottom:none;}
+  .cat-row input{flex:1;background:var(--ash-800);border:1px solid var(--ash-line);border-radius:8px;color:var(--paper);padding:9px 12px;font-family:inherit;font-size:.9rem;}
+  .icon-btn{background:var(--ash-800);border:1px solid var(--ash-line);color:var(--paper);width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:.9rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .2s ease;}
+  .icon-btn:hover{background:var(--ash-700);}
+  .icon-btn.danger:hover{background:var(--red);border-color:var(--red);}
+
+  .item-card{background:var(--ash-800);border:1px solid var(--ash-line);border-radius:12px;padding:16px;margin-bottom:14px;}
+  .item-top{display:flex;gap:14px;align-items:flex-start;}
+  .item-photo-preview{width:70px;height:70px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--ash-700);}
+  .item-fields{flex:1;display:flex;flex-direction:column;gap:8px;}
+  .item-fields input, .item-fields textarea, .item-fields select{width:100%;background:var(--ash-900);border:1px solid var(--ash-line);border-radius:8px;color:var(--paper);padding:9px 12px;font-family:inherit;font-size:.88rem;}
+  .item-fields textarea{resize:vertical;min-height:44px;}
+  .field-row{display:flex;gap:8px;}
+  .variant-row{display:flex;gap:8px;align-items:center;}
+  .variant-toggle{display:flex;align-items:center;gap:8px;font-size:.82rem;color:var(--paper-dim);margin:4px 0;}
+  .item-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px;}
+  .small-btn{background:var(--ash-900);border:1px solid var(--ash-line);color:var(--paper);padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:700;cursor:pointer;transition:background .2s ease;}
+  .small-btn:hover{background:var(--ash-700);}
+  .small-btn.danger:hover{background:var(--red);border-color:var(--red);}
+  .small-btn.save{background:var(--orange);border-color:var(--orange);color:var(--ash-950);}
+  .small-btn.save:hover{background:#c94e0a;}
+  .add-item-btn{width:100%;border:1px dashed var(--ash-line);background:transparent;color:var(--paper-dim);padding:14px;border-radius:10px;cursor:pointer;font-weight:700;font-size:.85rem;transition:all .2s ease;}
+  .add-item-btn:hover{border-color:var(--orange);color:var(--orange);}
+
+  .publish-bar{position:fixed;bottom:0;left:0;right:0;background:var(--ash-900);border-top:1px solid var(--ash-line);padding:16px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;z-index:200;}
+  .publish-status{font-size:.82rem;color:var(--paper-dim);}
+  .publish-status.dirty{color:var(--orange);}
+  .toolbar{display:flex;gap:10px;justify-content:flex-end;margin-bottom:20px;}
+  .status-msg{font-size:.82rem;padding:10px 14px;border-radius:8px;margin-bottom:16px;display:none;}
+  .status-msg.show{display:block;}
+  .status-msg.ok{background:rgba(232,89,12,.12);color:var(--orange);border:1px solid rgba(232,89,12,.3);}
+  .status-msg.error{background:rgba(179,34,28,.12);color:#ff8a83;border:1px solid rgba(179,34,28,.3);}
+</style>
+</head>
+<body>
+
+<div id="login-screen" class="login-screen">
+  <div class="login-card">
+    <img src="images/kravings-logo.png" alt="Kravings Kitchen">
+    <h2>Admin access</h2>
+    <p>Enter the admin password to manage the menu.</p>
+    <input type="password" id="password-input" placeholder="Password" autocomplete="current-password">
+    <button class="btn" id="login-btn" style="width:100%;">Log in</button>
+    <p class="login-error" id="login-error"></p>
+  </div>
+</div>
+
+<div id="admin-app" style="display:none;">
+  <div class="admin-wrap">
+    <div class="admin-header">
+      <h1>Menu admin</h1>
+      <p>Edit categories and items here. Nothing customers see changes until you press Publish.</p>
+    </div>
+
+    <div class="toolbar">
+      <button class="small-btn" id="refresh-btn">Reload draft</button>
+      <button class="small-btn danger" id="logout-btn">Log out</button>
+    </div>
+
+    <div id="status-msg" class="status-msg"></div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Categories</h2>
+        <button class="icon-btn" id="add-category-btn" title="Add category">+</button>
+      </div>
+      <div id="categories-list"></div>
+    </div>
+
+    <div id="items-panels"></div>
+  </div>
+
+  <div class="publish-bar">
+    <span class="publish-status" id="publish-status">Draft matches the live site.</span>
+    <button class="btn" id="publish-btn">Publish changes</button>
+  </div>
+</div>
+
+<script>
+  // ====== FILL THESE IN FROM YOUR SUPABASE PROJECT SETTINGS ======
+  var SUPABASE_URL = 'https://eufuhzjsnhrabxkspxjh.supabase.co';
+  var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1ZnVoempzbmhyYWJ4a3NweGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODkyMTI0MDcsImV4cCI6MjEwNDc4ODQwN30.5r69GeVwjBMCzfOZOonpF8BJGkDFPaxKBmokCghSmNY';
+  var ADMIN_EMAIL = 'danielekeamadi@gmail.com'; 
+  // =================================================================
+
+  var supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  var loginScreen = document.getElementById('login-screen');
+  var adminApp = document.getElementById('admin-app');
+  var passwordInput = document.getElementById('password-input');
+  var loginBtn = document.getElementById('login-btn');
+  var loginError = document.getElementById('login-error');
+
+  var state = { categories: [], items: [], dirty: false };
+
+  function setStatus(msg, type){
+    var el = document.getElementById('status-msg');
+    el.textContent = msg;
+    el.className = 'status-msg show ' + (type || 'ok');
+    setTimeout(function(){ el.classList.remove('show'); }, 4000);
+  }
+  function markDirty(){
+    state.dirty = true;
+    var ps = document.getElementById('publish-status');
+    ps.textContent = 'Unpublished changes waiting.';
+    ps.classList.add('dirty');
+  }
+  function markClean(){
+    state.dirty = false;
+    var ps = document.getElementById('publish-status');
+    ps.textContent = 'Draft matches the live site.';
+    ps.classList.remove('dirty');
+  }
+
+  async function checkSession(){
+    var { data } = await supabase.auth.getSession();
+    if(data.session){ showAdmin(); } else { showLogin(); }
+  }
+  function showLogin(){ loginScreen.style.display = 'flex'; adminApp.style.display = 'none'; }
+  function showAdmin(){ loginScreen.style.display = 'none'; adminApp.style.display = 'block'; loadDraft(); }
+
+  loginBtn.addEventListener('click', async function(){
+    loginError.textContent = '';
+    var password = passwordInput.value;
+    if(!password){ loginError.textContent = 'Enter the password.'; return; }
+    var { error } = await supabase.auth.signInWithPassword({ email: ADMIN_EMAIL, password: password });
+    if(error){ loginError.textContent = 'Wrong password.'; return; }
+    showAdmin();
+  });
+  passwordInput.addEventListener('keydown', function(e){ if(e.key === 'Enter') loginBtn.click(); });
+
+  document.getElementById('logout-btn').addEventListener('click', async function(){
+    await supabase.auth.signOut();
+    showLogin();
+  });
+
+  document.getElementById('refresh-btn').addEventListener('click', loadDraft);
+
+  async function loadDraft(){
+    var { data: categories, error: catErr } = await supabase.from('categories').select('*').order('sort_order');
+    var { data: items, error: itemErr } = await supabase.from('items').select('*').order('sort_order');
+    if(catErr || itemErr){ setStatus('Could not load the draft. Check your connection.', 'error'); return; }
+    state.categories = categories || [];
+    state.items = items || [];
+    renderAll();
+    markClean();
+  }
+
+  function renderAll(){
+    renderCategories();
+    renderItemPanels();
+  }
+
+  function renderCategories(){
+    var list = document.getElementById('categories-list');
+    list.innerHTML = '';
+    state.categories.forEach(function(cat, i){
+      var row = document.createElement('div');
+      row.className = 'cat-row';
+      row.innerHTML =
+        '<input type="text" value="' + escAttr(cat.label) + '" data-id="' + cat.id + '">' +
+        '<button class="icon-btn" data-action="up" title="Move up">\u2191</button>' +
+        '<button class="icon-btn" data-action="down" title="Move down">\u2193</button>' +
+        '<button class="icon-btn danger" data-action="delete" title="Delete category">\u2715</button>';
+      row.querySelector('input').addEventListener('change', async function(e){
+        var { error } = await supabase.from('categories').update({ label: e.target.value }).eq('id', cat.id);
+        if(error){ setStatus('Could not rename category.', 'error'); } else { markDirty(); cat.label = e.target.value; renderItemPanels(); }
+      });
+      row.querySelector('[data-action="up"]').addEventListener('click', function(){ moveCategory(i, -1); });
+      row.querySelector('[data-action="down"]').addEventListener('click', function(){ moveCategory(i, 1); });
+      row.querySelector('[data-action="delete"]').addEventListener('click', function(){ deleteCategory(cat); });
+      list.appendChild(row);
+    });
+  }
+
+  async function moveCategory(index, dir){
+    var target = index + dir;
+    if(target < 0 || target >= state.categories.length) return;
+    var a = state.categories[index], b = state.categories[target];
+    var tmp = a.sort_order; a.sort_order = b.sort_order; b.sort_order = tmp;
+    await supabase.from('categories').update({ sort_order: a.sort_order }).eq('id', a.id);
+    await supabase.from('categories').update({ sort_order: b.sort_order }).eq('id', b.id);
+    state.categories.sort(function(x,y){ return x.sort_order - y.sort_order; });
+    markDirty();
+    renderAll();
+  }
+
+  async function deleteCategory(cat){
+    if(!confirm('Delete "' + cat.label + '" and every item in it? This cannot be undone.')) return;
+    await supabase.from('items').delete().eq('category_id', cat.id);
+    await supabase.from('categories').delete().eq('id', cat.id);
+    markDirty();
+    loadDraft();
+  }
+
+  document.getElementById('add-category-btn').addEventListener('click', async function(){
+    var label = prompt('New category name:');
+    if(!label) return;
+    var key = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+    var maxOrder = state.categories.reduce(function(m,c){ return Math.max(m, c.sort_order); }, 0);
+    var { error } = await supabase.from('categories').insert({ key: key, label: label, sort_order: maxOrder + 10 });
+    if(error){ setStatus('Could not add category. The internal key may already exist.', 'error'); return; }
+    markDirty();
+    loadDraft();
+  });
+
+  function renderItemPanels(){
+    var wrap = document.getElementById('items-panels');
+    wrap.innerHTML = '';
+    state.categories.forEach(function(cat){
+      var panel = document.createElement('div');
+      panel.className = 'panel';
+      var itemsInCat = state.items.filter(function(it){ return it.category_id === cat.id; });
+      panel.innerHTML = '<div class="panel-head"><h2>' + escHtml(cat.label) + '</h2></div>';
+      var itemsWrap = document.createElement('div');
+      itemsInCat.forEach(function(item){ itemsWrap.appendChild(renderItemCard(item)); });
+      panel.appendChild(itemsWrap);
+      var addBtn = document.createElement('button');
+      addBtn.className = 'add-item-btn';
+      addBtn.textContent = 'Add item to ' + cat.label;
+      addBtn.addEventListener('click', function(){ addItem(cat); });
+      panel.appendChild(addBtn);
+      wrap.appendChild(panel);
+    });
+  }
+
+  function renderItemCard(item){
+    var card = document.createElement('div');
+    card.className = 'item-card';
+    var hasVariants = !!(item.variants && item.variants.length);
+    card.innerHTML =
+      '<div class="item-top">' +
+        '<img class="item-photo-preview" src="' + escAttr(item.photo_url || '') + '" alt="">' +
+        '<div class="item-fields">' +
+          '<input type="text" class="f-name" value="' + escAttr(item.name) + '" placeholder="Item name">' +
+          '<textarea class="f-note" placeholder="Description">' + escHtml(item.note || '') + '</textarea>' +
+          '<label class="variant-toggle"><input type="checkbox" class="f-has-variants"' + (hasVariants ? ' checked' : '') + '> This item has sizes (small/medium/large) instead of one price</label>' +
+          '<div class="f-single-price" style="' + (hasVariants ? 'display:none' : '') + '">' +
+            '<input type="number" class="f-price" placeholder="Price (naira)" value="' + (item.price != null ? item.price : '') + '">' +
+          '</div>' +
+          '<div class="f-variants" style="' + (hasVariants ? '' : 'display:none') + '"></div>' +
+          '<input type="file" class="f-photo" accept="image/*">' +
+        '</div>' +
+      '</div>' +
+      '<div class="item-actions">' +
+        '<button class="small-btn danger" data-action="delete">Delete</button>' +
+        '<button class="small-btn save" data-action="save">Save</button>' +
+      '</div>';
+
+    var variantsWrap = card.querySelector('.f-variants');
+    var variants = hasVariants ? item.variants.slice() : [{ label: 'Small', price: '' }, { label: 'Large', price: '' }];
+    function renderVariantRows(){
+      variantsWrap.innerHTML = '';
+      variants.forEach(function(v, i){
+        var row = document.createElement('div');
+        row.className = 'variant-row';
+        row.style.marginBottom = '6px';
+        row.innerHTML =
+          '<input type="text" value="' + escAttr(v.label) + '" placeholder="Label (e.g. Small)" style="flex:1;">' +
+          '<input type="number" value="' + (v.price != null ? v.price : '') + '" placeholder="Price" style="flex:1;">' +
+          '<button class="icon-btn danger" type="button">\u2715</button>';
+        row.children[0].addEventListener('input', function(e){ variants[i].label = e.target.value; });
+        row.children[1].addEventListener('input', function(e){ variants[i].price = Number(e.target.value); });
+        row.children[2].addEventListener('click', function(){ variants.splice(i,1); renderVariantRows(); });
+        variantsWrap.appendChild(row);
+      });
+      var addVariantBtn = document.createElement('button');
+      addVariantBtn.className = 'small-btn';
+      addVariantBtn.type = 'button';
+      addVariantBtn.textContent = 'Add size';
+      addVariantBtn.addEventListener('click', function(){ variants.push({ label: '', price: '' }); renderVariantRows(); });
+      variantsWrap.appendChild(addVariantBtn);
+    }
+    renderVariantRows();
+
+    card.querySelector('.f-has-variants').addEventListener('change', function(e){
+      card.querySelector('.f-single-price').style.display = e.target.checked ? 'none' : '';
+      variantsWrap.style.display = e.target.checked ? '' : 'none';
+    });
+
+    card.querySelector('[data-action="delete"]').addEventListener('click', async function(){
+      if(!confirm('Delete "' + item.name + '"?')) return;
+      await supabase.from('items').delete().eq('id', item.id);
+      markDirty();
+      loadDraft();
+    });
+
+    card.querySelector('[data-action="save"]').addEventListener('click', async function(){
+      var name = card.querySelector('.f-name').value.trim();
+      var note = card.querySelector('.f-note').value.trim();
+      var usesVariants = card.querySelector('.f-has-variants').checked;
+      var photoFile = card.querySelector('.f-photo').files[0];
+      var payload = { name: name, note: note };
+
+      if(usesVariants){
+        payload.price = null;
+        payload.variants = variants.filter(function(v){ return v.label && v.price !== ''; }).map(function(v){ return { label: v.label, price: Number(v.price) }; });
+      } else {
+        payload.price = Number(card.querySelector('.f-price').value) || 0;
+        payload.variants = null;
+      }
+
+      if(photoFile){
+        var path = 'items/' + Date.now() + '-' + photoFile.name.replace(/\s+/g, '-');
+        var { error: uploadErr } = await supabase.storage.from('menu-photos').upload(path, photoFile);
+        if(uploadErr){ setStatus('Photo upload failed: ' + uploadErr.message, 'error'); return; }
+        var { data: urlData } = supabase.storage.from('menu-photos').getPublicUrl(path);
+        payload.photo_url = urlData.publicUrl;
+      }
+
+      var { error } = await supabase.from('items').update(payload).eq('id', item.id);
+      if(error){ setStatus('Could not save item.', 'error'); return; }
+      setStatus('Saved "' + name + '" to draft.', 'ok');
+      markDirty();
+      loadDraft();
+    });
+
+    return card;
+  }
+
+  async function addItem(cat){
+    var { error } = await supabase.from('items').insert({
+      category_id: cat.id, name: 'New item', note: '', price: 0, sort_order: (state.items.filter(function(i){return i.category_id===cat.id;}).length + 1) * 10
+    });
+    if(error){ setStatus('Could not add item.', 'error'); return; }
+    markDirty();
+    loadDraft();
+  }
+
+  document.getElementById('publish-btn').addEventListener('click', async function(){
+    var snapshot = {};
+    state.categories.forEach(function(cat){
+      var itemsInCat = state.items.filter(function(it){ return it.category_id === cat.id; });
+      snapshot[cat.key] = {
+        label: cat.label,
+        items: itemsInCat.map(function(it){
+          var out = { id: it.id, name: it.name, note: it.note, photo: it.photo_url };
+          if(it.variants && it.variants.length){ out.variants = it.variants; } else { out.price = it.price; }
+          return out;
+        })
+      };
+    });
+    var { error } = await supabase.from('published_snapshot').update({ data: snapshot, updated_at: new Date().toISOString() }).eq('id', 1);
+    if(error){ setStatus('Publish failed: ' + error.message, 'error'); return; }
+    setStatus('Published. The live site now shows these changes.', 'ok');
+    markClean();
+  });
+
+  function escHtml(s){ var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+  function escAttr(s){ return String(s || '').replace(/"/g, '&quot;'); }
+
+  checkSession();
+</script>
+
+</body>
+</html>
