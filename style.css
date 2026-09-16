@@ -206,20 +206,50 @@ footer p.tagline{color:var(--paper-dim);font-size:.9rem;max-width:380px;}
 .clear-cart-btn:hover{color:#ff8a83;}
 .cart-note{color:var(--paper-dim);font-size:.75rem;margin-top:14px;line-height:1.6;}
 
-/* ---------- shared site confirm modal (e.g. "Clear your order?") ---------- */
-.site-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1400;display:none;align-items:flex-end;justify-content:center;}
-.site-modal-overlay.open{display:flex;}
-.site-modal-card{background:var(--ash-900);border:1px solid var(--ash-line);border-radius:18px 18px 0 0;padding:26px 22px calc(22px + env(safe-area-inset-bottom));width:100%;max-width:420px;}
-.site-modal-card h3{font-size:1.1rem;margin-bottom:8px;}
-.site-modal-card p{color:var(--paper-dim);font-size:.86rem;margin-bottom:20px;}
-.site-modal-actions{display:flex;gap:10px;}
-.site-modal-actions .btn, .site-modal-actions .small-btn{flex:1;min-height:48px;}
-.site-modal-actions .small-btn{background:var(--ash-800);border:1px solid var(--ash-line);color:var(--paper);border-radius:0;font-weight:700;font-size:.86rem;cursor:pointer;}
-.site-modal-actions .small-btn:hover{background:var(--ash-700);}
-@media (min-width:560px){
-  .site-modal-overlay{align-items:center;}
-  .site-modal-card{border-radius:16px;}
+/* ============================================================
+   Branded confirm modal ("Clear order?" etc.)
+   Replace your existing .site-modal-* rules in style.css with
+   this block (or add it if you don't have one yet).
+   ============================================================ */
+
+.site-modal-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1400;
+  display:flex;align-items:center;justify-content:center;padding:24px;
+  opacity:0;pointer-events:none;transition:opacity .25s ease;
 }
+.site-modal-overlay.open{opacity:1;pointer-events:auto;}
+
+.site-modal-card{
+  background:var(--ash-900);border:1px solid var(--ash-line);border-top:3px solid var(--red);
+  border-radius:16px;padding:30px 26px;max-width:340px;width:100%;text-align:center;
+  transform:translateY(14px) scale(.97);transition:transform .25s ease;
+}
+.site-modal-overlay.open .site-modal-card{transform:translateY(0) scale(1);}
+
+/* Warning icon, shown above the title */
+.site-modal-card::before{
+  content:'';display:block;width:48px;height:48px;margin:0 auto 16px;border-radius:50%;
+  background:rgba(179,34,28,.14);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B3221C' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z'%3E%3C/path%3E%3Cline x1='12' y1='9' x2='12' y2='13'%3E%3C/line%3E%3Cline x1='12' y1='17' x2='12.01' y2='17'%3E%3C/line%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:center;background-size:22px;
+}
+
+.site-modal-card h3{
+  font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:700;color:var(--paper);margin-bottom:8px;
+}
+.site-modal-card p{color:var(--paper-dim);font-size:.86rem;line-height:1.5;margin-bottom:22px;}
+
+.site-modal-actions{display:flex;gap:10px;}
+.site-modal-actions .small-btn{
+  flex:1;background:var(--ash-800);border:1px solid var(--ash-line);color:var(--paper);
+  padding:12px;border-radius:10px;font-size:.85rem;font-weight:700;cursor:pointer;transition:background .2s ease;
+}
+.site-modal-actions .small-btn:hover{background:var(--ash-700);}
+.site-modal-actions .btn{
+  flex:1;background:var(--red);border:1px solid var(--red);color:var(--on-accent);
+  padding:12px;border-radius:10px;font-size:.85rem;font-weight:700;
+}
+.site-modal-actions .btn:hover{background:var(--red-deep);border-color:var(--red-deep);transform:none;box-shadow:none;}
 
 .mobile-cart-bar{position:fixed;left:16px;right:16px;bottom:16px;z-index:900;background:var(--red);color:var(--on-accent);padding:16px 22px;border-radius:12px;display:none;align-items:center;justify-content:space-between;box-shadow:0 10px 30px rgba(0,0,0,.4);cursor:pointer;transition:transform .2s ease;}
 .mobile-cart-bar.show{display:flex;}
