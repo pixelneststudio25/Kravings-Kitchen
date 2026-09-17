@@ -1,6 +1,7 @@
 var WHATSAPP_NUMBER = '2349094304208';
 var CART_KEY = 'kravings_cart_v3';
-var DELIVERY_FEE = 500;
+var TAKEAWAY_FEE = 500;
+var TAKEAWAY_EXEMPT_CATEGORIES = ['drinks', 'shawarma']; // items in these categories don't get the automatic takeaway charge
 
 // ====== FILL THESE IN FROM YOUR SUPABASE PROJECT SETTINGS ======
 var SUPABASE_URL = 'https://eufuhzjsnhrabxkspxjh.supabase.co';
@@ -84,14 +85,6 @@ var MENU = {
       { id: 'zobo', name: 'Zobo', price: 500, note: 'Dark, tart, lightly spiced.', photo: 'images/zobo.jpg' },
       { id: 'tigernut', name: 'Tigernut', price: 1000, note: 'Cold, naturally sweet, made in house.', photo: 'images/kunu.jpg' }
     ]
-  },
-  extras: {
-    label: 'Extras',
-    items: [
-      { id: 'takeaway-plate', name: 'Takeaway plate', note: 'Add this if you need your order packed to go.', photo: 'images/fried yam.jpg', variants: [
-        { label: 'Small', price: 300 }, { label: 'Large', price: 500 }
-      ]}
-    ]
   }
 };
 
@@ -112,6 +105,25 @@ window.kravingsMenuReady = (async function(){
   }catch(e){ /* keep the hardcoded MENU as a safe fallback */ }
 })();
 
+/* ---------- shared "premium" button loading spinner ---------- */
+// Usage: setButtonLoading(buttonEl, true) before an async call, then
+// setButtonLoading(buttonEl, false) in a finally block once it resolves.
+function setButtonLoading(btn, isLoading){
+  if(!btn) return;
+  if(isLoading){
+    if(btn.dataset.loading === '1') return;
+    btn.dataset.loading = '1';
+    btn.dataset.originalText = btn.textContent;
+    btn.disabled = true;
+    btn.classList.add('btn-loading');
+  } else {
+    btn.dataset.loading = '';
+    btn.disabled = false;
+    btn.classList.remove('btn-loading');
+    if(btn.dataset.originalText){ btn.textContent = btn.dataset.originalText; }
+  }
+}
+
 function loadCart(){
   try{
     var raw = localStorage.getItem(CART_KEY);
@@ -120,6 +132,15 @@ function loadCart(){
 }
 function saveCart(cart){
   try{ localStorage.setItem(CART_KEY, JSON.stringify(cart)); }catch(e){}
+}
+
+function countTakeawayUnits(cart){
+  var count = 0;
+  Object.keys(cart).forEach(function(id){
+    var line = cart[id];
+    if(line.takeaway !== false){ count += line.qty; }
+  });
+  return count;
 }
 
 function buildWhatsAppMessage(cart){
@@ -131,10 +152,14 @@ function buildWhatsAppMessage(cart){
     itemsTotal += lineTotal;
     lines.push('- ' + line.qty + 'x ' + line.name + ' (' + formatNaira(lineTotal) + ')');
   });
+  var takeawayUnits = countTakeawayUnits(cart);
+  var takeawayFee = takeawayUnits * TAKEAWAY_FEE;
   lines.push('');
   lines.push('Subtotal: ' + formatNaira(itemsTotal));
-  lines.push('Delivery fee: ' + formatNaira(DELIVERY_FEE));
-  lines.push('Total: ' + formatNaira(itemsTotal + DELIVERY_FEE));
+  if(takeawayUnits > 0){
+    lines.push('Takeaway (' + takeawayUnits + (takeawayUnits === 1 ? ' pack' : ' packs') + '): ' + formatNaira(takeawayFee));
+  }
+  lines.push('Total: ' + formatNaira(itemsTotal + takeawayFee));
   lines.push('');
   lines.push('Please confirm delivery or pickup, and how to pay. Thank you.');
   return lines.join('\n');
@@ -177,11 +202,10 @@ function initCartUI(){
   var cartCountEls = document.querySelectorAll('.cart-count');
   var checkoutBtn = document.getElementById('checkout-btn');
   var clearBtn = document.getElementById('clear-cart-btn');
+  var barClearBtn = document.getElementById('bar-clear-btn');
   var mobileBar = document.getElementById('mobile-cart-bar');
   var mobileSummary = document.getElementById('mobile-cart-summary');
   var mobileTotal = document.getElementById('mobile-cart-total');
-
-  if(cartFeeEl) cartFeeEl.textContent = formatNaira(DELIVERY_FEE);
 
   function renderCart(){
     var ids = Object.keys(cart);
@@ -221,9 +245,12 @@ function initCartUI(){
       ids.forEach(function(id){ itemsTotal += cart[id].price * cart[id].qty; count += cart[id].qty; });
     }
 
-    var grandTotal = count > 0 ? itemsTotal + DELIVERY_FEE : 0;
+    var takeawayUnits = countTakeawayUnits(cart);
+    var takeawayFee = takeawayUnits * TAKEAWAY_FEE;
+    var grandTotal = count > 0 ? itemsTotal + takeawayFee : 0;
 
-    if(cartFeeRow) cartFeeRow.hidden = count === 0;
+    if(cartFeeRow) cartFeeRow.hidden = takeawayUnits === 0;
+    if(cartFeeEl) cartFeeEl.textContent = formatNaira(takeawayFee);
     if(cartTotalEl) cartTotalEl.textContent = formatNaira(grandTotal);
     if(mobileTotal) mobileTotal.textContent = formatNaira(grandTotal);
     if(mobileSummary) mobileSummary.textContent = count + (count === 1 ? ' item' : ' items');
@@ -237,9 +264,11 @@ function initCartUI(){
     if(clearBtn) clearBtn.hidden = count === 0;
   }
 
-  function addToCart(id, name, price){
+  // chargesTakeaway defaults to true so any older call sites keep working
+  function addToCart(id, name, price, chargesTakeaway){
+    var takeaway = chargesTakeaway !== false;
     if(cart[id]){ cart[id].qty += 1; }
-    else { cart[id] = { name: name, price: price, qty: 1 }; }
+    else { cart[id] = { name: name, price: price, qty: 1, takeaway: takeaway }; }
     saveCart(cart);
     renderCart();
     showAddedToast(name);
@@ -304,12 +333,22 @@ function initCartUI(){
   if(cartOverlay) cartOverlay.addEventListener('click', closeCart);
   if(mobileBar) mobileBar.addEventListener('click', openCart);
   if(clearBtn) clearBtn.addEventListener('click', clearCart);
+  if(barClearBtn){
+    barClearBtn.addEventListener('click', function(e){
+      e.stopPropagation(); // don't also trigger the bar's "open cart" click
+      clearCart();
+    });
+  }
 
   if(checkoutBtn){
     checkoutBtn.addEventListener('click', function(){
       if(Object.keys(cart).length === 0) return;
+      setButtonLoading(checkoutBtn, true);
       var msg = encodeURIComponent(buildWhatsAppMessage(cart));
-      window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + msg, '_blank');
+      setTimeout(function(){
+        window.open('https://wa.me/' + WHATSAPP_NUMBER + '?text=' + msg, '_blank');
+        setButtonLoading(checkoutBtn, false);
+      }, 450); // brief, deliberate pause so the spinner reads as real work, not a glitch
     });
   }
 
@@ -369,26 +408,27 @@ function initMobileDrawer(){
   drawer.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', closeDrawer); });
 }
 
-/* ---------- back-and-forth "this scrolls" nudge for the category chips ---------- */
+/* ---------- subtle "this scrolls" nudge for the category chips ---------- */
 function initChipAutoScroll(){
   var wrap = document.getElementById('menu-tabs');
   if(!wrap) return;
   var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(prefersReduced) return;
 
-  var direction = 1;
   var paused = false;
   var resumeTimer = null;
+  var nudgeDistance = 56; // small peek, not a full jump to the end
 
   function maxScroll(){ return wrap.scrollWidth - wrap.clientWidth; }
 
-  function tick(){
+  function nudge(){
     if(paused) return;
     var max = maxScroll();
-    if(max <= 4) return; // nothing to hint at
-    var target = direction === 1 ? max : 0;
-    wrap.scrollTo({ left: target, behavior: 'smooth' });
-    direction *= -1;
+    if(max <= 4) return; // everything already fits, nothing to hint at
+    wrap.scrollTo({ left: Math.min(nudgeDistance, max), behavior: 'smooth' });
+    setTimeout(function(){
+      if(!paused) wrap.scrollTo({ left: 0, behavior: 'smooth' });
+    }, 550);
   }
 
   function pause(){
@@ -402,7 +442,7 @@ function initChipAutoScroll(){
   });
 
   // give layout a moment to settle before measuring scrollWidth
-  setTimeout(function(){ setInterval(tick, 3000); }, 800);
+  setTimeout(function(){ setInterval(nudge, 3000); }, 800);
 }
 
 document.addEventListener('DOMContentLoaded', function(){
