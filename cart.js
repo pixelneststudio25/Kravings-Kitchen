@@ -422,15 +422,15 @@ function initChipAutoScroll(){
   var direction = 1;
   var paused = false;
   var resumeTimer = null;
-  var rafId = null;
   var lastTime = null;
   var waitingAtEnd = false;
+  var pos = 0; // our own precise, unrounded scroll position
 
   function maxScroll(){ return wrap.scrollWidth - wrap.clientWidth; }
 
   function frame(time){
-    rafId = requestAnimationFrame(frame);
-    if(paused || waitingAtEnd) { lastTime = time; return; }
+    requestAnimationFrame(frame);
+    if(paused || waitingAtEnd){ lastTime = time; return; }
 
     var max = maxScroll();
     if(max <= 4) return; // everything already fits, nothing to drift
@@ -439,17 +439,12 @@ function initChipAutoScroll(){
     var dt = (time - lastTime) / 1000;
     lastTime = time;
 
-    var next = wrap.scrollLeft + direction * SPEED * dt;
+    pos += direction * SPEED * dt;
 
-    if(next >= max){
-      wrap.scrollLeft = max;
-      flipAtEnd();
-    } else if(next <= 0){
-      wrap.scrollLeft = 0;
-      flipAtEnd();
-    } else {
-      wrap.scrollLeft = next;
-    }
+    if(pos >= max){ pos = max; flipAtEnd(); }
+    else if(pos <= 0){ pos = 0; flipAtEnd(); }
+
+    wrap.scrollLeft = pos;
   }
 
   function flipAtEnd(){
@@ -462,6 +457,7 @@ function initChipAutoScroll(){
 
   function pause(){
     paused = true;
+    pos = wrap.scrollLeft; // resync in case the user manually scrolled
     clearTimeout(resumeTimer);
     resumeTimer = setTimeout(function(){ paused = false; lastTime = null; }, RESUME_DELAY);
   }
@@ -470,5 +466,5 @@ function initChipAutoScroll(){
     wrap.addEventListener(evt, pause, { passive: true });
   });
 
-  setTimeout(function(){ rafId = requestAnimationFrame(frame); }, 800);
+  setTimeout(function(){ requestAnimationFrame(frame); }, 800);
 }
