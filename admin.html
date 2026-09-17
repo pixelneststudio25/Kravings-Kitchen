@@ -282,6 +282,21 @@
 
   var chevronSvg = '<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>';
 
+  // Shared with the public site's cart.js pattern: toggles a spinner + disables the button.
+  function setButtonLoading(btn, isLoading){
+    if(!btn) return;
+    if(isLoading){
+      if(btn.dataset.loading === '1') return;
+      btn.dataset.loading = '1';
+      btn.disabled = true;
+      btn.classList.add('btn-loading');
+    } else {
+      btn.dataset.loading = '';
+      btn.disabled = false;
+      btn.classList.remove('btn-loading');
+    }
+  }
+
   function setStatus(msg, type){
     var el = document.getElementById('status-msg');
     el.textContent = msg;
@@ -312,7 +327,9 @@
     loginError.textContent = '';
     var password = passwordInput.value;
     if(!password){ loginError.textContent = 'Enter the password.'; return; }
+    setButtonLoading(loginBtn, true);
     var { error } = await supabase.auth.signInWithPassword({ email: ADMIN_EMAIL, password: password });
+    setButtonLoading(loginBtn, false);
     if(error){ loginError.textContent = 'Wrong password.'; return; }
     showAdmin();
   });
@@ -323,7 +340,12 @@
     showLogin();
   });
 
-  document.getElementById('refresh-btn').addEventListener('click', loadDraft);
+  document.getElementById('refresh-btn').addEventListener('click', async function(){
+    var btn = this;
+    setButtonLoading(btn, true);
+    await loadDraft();
+    setButtonLoading(btn, false);
+  });
 
   async function loadDraft(){
     var { data: categories, error: catErr } = await supabase.from('categories').select('*').order('sort_order');
@@ -363,7 +385,7 @@
       });
       row.querySelector('[data-action="up"]').addEventListener('click', function(){ moveCategory(i, -1); });
       row.querySelector('[data-action="down"]').addEventListener('click', function(){ moveCategory(i, 1); });
-      row.querySelector('[data-action="delete"]').addEventListener('click', function(){ deleteCategory(cat); });
+      row.querySelector('[data-action="delete"]').addEventListener('click', function(e){ deleteCategory(cat, e.currentTarget); });
       list.appendChild(row);
     });
   }
@@ -380,8 +402,9 @@
     renderAll();
   }
 
-  async function deleteCategory(cat){
+  async function deleteCategory(cat, btn){
     if(!confirm('Delete "' + cat.label + '" and every item in it? This cannot be undone.')) return;
+    setButtonLoading(btn, true);
     await supabase.from('items').delete().eq('category_id', cat.id);
     await supabase.from('categories').delete().eq('id', cat.id);
     markDirty();
@@ -391,10 +414,12 @@
   document.getElementById('add-category-btn').addEventListener('click', async function(){
     var label = prompt('New category name:');
     if(!label) return;
+    var btn = this;
+    setButtonLoading(btn, true);
     var key = label.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     var maxOrder = state.categories.reduce(function(m,c){ return Math.max(m, c.sort_order); }, 0);
     var { error } = await supabase.from('categories').insert({ key: key, label: label, sort_order: maxOrder + 10 });
-    if(error){ setStatus('Could not add category. The internal key may already exist.', 'error'); return; }
+    if(error){ setStatus('Could not add category. The internal key may already exist.', 'error'); setButtonLoading(btn, false); return; }
     markDirty();
     loadDraft();
   });
@@ -428,7 +453,7 @@
       var addBtn = document.createElement('button');
       addBtn.className = 'add-item-btn';
       addBtn.textContent = '+ Add item';
-      addBtn.addEventListener('click', function(e){ e.stopPropagation(); addItem(cat); });
+      addBtn.addEventListener('click', function(e){ e.stopPropagation(); addItem(cat, addBtn); });
       body.appendChild(addBtn);
       panel.appendChild(body);
 
@@ -528,6 +553,7 @@
     detail.querySelector('[data-action="delete"]').addEventListener('click', async function(e){
       e.stopPropagation();
       if(!confirm('Delete "' + item.name + '"?')) return;
+      setButtonLoading(e.currentTarget, true);
       await supabase.from('items').delete().eq('id', item.id);
       markDirty();
       loadDraft();
@@ -535,6 +561,8 @@
 
     detail.querySelector('[data-action="save"]').addEventListener('click', async function(e){
       e.stopPropagation();
+      var saveBtn = e.currentTarget;
+      setButtonLoading(saveBtn, true);
       var name = detail.querySelector('.f-name').value.trim();
       var note = detail.querySelector('.f-note').value.trim();
       var usesVariants = detail.querySelector('.f-has-variants').checked;
@@ -552,13 +580,13 @@
       if(photoFile){
         var path = 'items/' + Date.now() + '-' + photoFile.name.replace(/\s+/g, '-');
         var { error: uploadErr } = await supabase.storage.from('menu-photos').upload(path, photoFile);
-        if(uploadErr){ setStatus('Photo upload failed: ' + uploadErr.message, 'error'); return; }
+        if(uploadErr){ setStatus('Photo upload failed: ' + uploadErr.message, 'error'); setButtonLoading(saveBtn, false); return; }
         var { data: urlData } = supabase.storage.from('menu-photos').getPublicUrl(path);
         payload.photo_url = urlData.publicUrl;
       }
 
       var { error } = await supabase.from('items').update(payload).eq('id', item.id);
-      if(error){ setStatus('Could not save item.', 'error'); return; }
+      if(error){ setStatus('Could not save item.', 'error'); setButtonLoading(saveBtn, false); return; }
       setStatus('Saved "' + name + '" to draft.', 'ok');
       markDirty();
       loadDraft();
@@ -567,12 +595,13 @@
     return card;
   }
 
-  async function addItem(cat){
+  async function addItem(cat, btn){
+    setButtonLoading(btn, true);
     var { error, data } = await supabase.from('items').insert({
       category_id: cat.id, name: 'New item', note: '', price: 0,
       sort_order: (state.items.filter(function(i){return i.category_id===cat.id;}).length + 1) * 10
     }).select().single();
-    if(error){ setStatus('Could not add item.', 'error'); return; }
+    if(error){ setStatus('Could not add item.', 'error'); setButtonLoading(btn, false); return; }
     markDirty();
     state.openCategoryId = cat.id;
     if(data) state.openItemId = data.id;
@@ -580,6 +609,8 @@
   }
 
   document.getElementById('publish-btn').addEventListener('click', async function(){
+    var btn = this;
+    setButtonLoading(btn, true);
     var snapshot = {};
     var itemCount = 0;
     state.categories.forEach(function(cat){
@@ -595,6 +626,7 @@
       };
     });
     var { error } = await supabase.from('published_snapshot').update({ data: snapshot, updated_at: new Date().toISOString() }).eq('id', 1);
+    setButtonLoading(btn, false);
     if(error){ setStatus('Publish failed: ' + error.message, 'error'); return; }
     markClean();
     showPublishModal(state.categories.length, itemCount);
