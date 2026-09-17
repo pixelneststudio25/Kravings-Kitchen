@@ -410,7 +410,7 @@ function initMobileDrawer(){
 
 /* ---------- subtle "this scrolls" nudge for the category chips ---------- */
 function initChipAutoScroll(){
-  var wrap = document.getElementById('menu-tabs');
+  var wrap = document.getElementById('menu-tabs-scroll');
   if(!wrap) return;
   var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(prefersReduced) return;
