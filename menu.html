@@ -98,17 +98,20 @@
   <div class="cart-items" id="cart-items"></div>
   <div class="cart-foot">
     <div class="cart-fee-row" id="cart-fee-row" hidden>
-      <span>Delivery fee</span><span id="cart-fee">₦500</span>
+      <span>Takeaway fee</span><span id="cart-fee">₦0</span>
     </div>
     <div class="cart-total-row"><span>Total</span><strong id="cart-total">₦0</strong></div>
     <button class="btn" id="checkout-btn" disabled>Order on WhatsApp</button>
     <button class="clear-cart-btn" id="clear-cart-btn" hidden type="button">Clear order</button>
-    <p class="cart-note">A ₦500 delivery fee is added automatically and covered by the customer. Confirm delivery or pickup with us on WhatsApp.</p>
+    <p class="cart-note">A ₦500 takeaway pack fee applies per dish and is covered by the customer. Drinks and shawarma are excluded, since they already come packaged. Confirm delivery or pickup with us on WhatsApp.</p>
   </div>
 </aside>
 
 <div class="mobile-cart-bar" id="mobile-cart-bar">
   <span id="mobile-cart-summary">0 items</span>
+  <button class="bar-clear-btn" id="bar-clear-btn" type="button" aria-label="Clear order">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path></svg>
+  </button>
   <span id="mobile-cart-total">₦0</span>
 </div>
 
@@ -168,15 +171,16 @@
       block.appendChild(count);
 
       cat.items.forEach(function(item){
-        block.appendChild(renderMenuItem(item));
+        block.appendChild(renderMenuItem(item, catKey));
       });
 
       containerEl.appendChild(block);
     });
 
-    function renderMenuItem(item){
+    function renderMenuItem(item, catKey){
       var card = document.createElement('div');
       card.className = 'menu-item-full reveal';
+      var chargesTakeaway = TAKEAWAY_EXEMPT_CATEGORIES.indexOf(catKey) === -1;
 
       var photo = document.createElement('div');
       photo.className = 'menu-item-photo';
@@ -228,7 +232,7 @@
         var lineId = item.id + (variant ? '-' + variant.label.toLowerCase() : '');
         var lineName = item.name + (variant ? ' (' + variant.label + ')' : '');
         var linePrice = variant ? variant.price : item.price;
-        window.kravingsAddToCart(lineId, lineName, linePrice);
+        window.kravingsAddToCart(lineId, lineName, linePrice, chargesTakeaway);
         addBtn.textContent = 'Added';
         addBtn.classList.add('added');
         setTimeout(function(){ addBtn.textContent = 'Add to order'; addBtn.classList.remove('added'); }, 900);
