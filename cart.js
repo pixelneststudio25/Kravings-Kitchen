@@ -408,50 +408,67 @@ function initMobileDrawer(){
   drawer.querySelectorAll('a').forEach(function(a){ a.addEventListener('click', closeDrawer); });
 }
 
-/* ---------- subtle "this scrolls" nudge for the category chips ---------- */
+/* ---------- continuous subtle drift for the category chips ---------- */
 function initChipAutoScroll(){
   var wrap = document.getElementById('menu-tabs-scroll');
   if(!wrap) return;
   var prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(prefersReduced) return;
 
+  var SPEED = 22; // pixels per second — lower = slower, higher = faster
+  var PAUSE_AT_ENDS = 900; // ms to sit still at each end before reversing
+  var RESUME_DELAY = 4000; // ms of no interaction before auto-drift resumes
+
+  var direction = 1;
   var paused = false;
   var resumeTimer = null;
-  var nudgeDistance = 56; // small peek, not a full jump to the end
+  var rafId = null;
+  var lastTime = null;
+  var waitingAtEnd = false;
 
   function maxScroll(){ return wrap.scrollWidth - wrap.clientWidth; }
 
-  function nudge(){
-    if(paused) return;
+  function frame(time){
+    rafId = requestAnimationFrame(frame);
+    if(paused || waitingAtEnd) { lastTime = time; return; }
+
     var max = maxScroll();
-    if(max <= 4) return; // everything already fits, nothing to hint at
-    wrap.scrollTo({ left: Math.min(nudgeDistance, max), behavior: 'smooth' });
+    if(max <= 4) return; // everything already fits, nothing to drift
+
+    if(lastTime == null){ lastTime = time; return; }
+    var dt = (time - lastTime) / 1000;
+    lastTime = time;
+
+    var next = wrap.scrollLeft + direction * SPEED * dt;
+
+    if(next >= max){
+      wrap.scrollLeft = max;
+      flipAtEnd();
+    } else if(next <= 0){
+      wrap.scrollLeft = 0;
+      flipAtEnd();
+    } else {
+      wrap.scrollLeft = next;
+    }
+  }
+
+  function flipAtEnd(){
+    waitingAtEnd = true;
     setTimeout(function(){
-      if(!paused) wrap.scrollTo({ left: 0, behavior: 'smooth' });
-    }, 550);
+      direction *= -1;
+      waitingAtEnd = false;
+    }, PAUSE_AT_ENDS);
   }
 
   function pause(){
     paused = true;
     clearTimeout(resumeTimer);
-    resumeTimer = setTimeout(function(){ paused = false; }, 4000);
+    resumeTimer = setTimeout(function(){ paused = false; lastTime = null; }, RESUME_DELAY);
   }
 
   ['touchstart', 'mousedown', 'wheel'].forEach(function(evt){
     wrap.addEventListener(evt, pause, { passive: true });
   });
 
-  // give layout a moment to settle before measuring scrollWidth
-  setTimeout(function(){ setInterval(nudge, 3000); }, 800);
+  setTimeout(function(){ rafId = requestAnimationFrame(frame); }, 800);
 }
-
-document.addEventListener('DOMContentLoaded', function(){
-  initSiteConfirmModal();
-  window.kravingsMenuReady.then(function(){
-    initCartUI();
-    initScrollReveal();
-    initNavScroll();
-    initMobileDrawer();
-    initChipAutoScroll();
-  });
-});
