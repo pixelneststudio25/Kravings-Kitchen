@@ -468,3 +468,13 @@ function initChipAutoScroll(){
 
   setTimeout(function(){ requestAnimationFrame(frame); }, 800);
 }
+document.addEventListener('DOMContentLoaded', function(){
+  initSiteConfirmModal();
+  window.kravingsMenuReady.then(function(){
+    initCartUI();
+    initScrollReveal();
+    initNavScroll();
+    initMobileDrawer();
+    initChipAutoScroll();
+  });
+});
